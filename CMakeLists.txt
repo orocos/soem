@@ -4,4 +4,6 @@ project(soem)
 
 add_subdirectory(src)
 
+install(FILES package.xml DESTINATION share/soem
+
 
