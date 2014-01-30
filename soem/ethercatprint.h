@@ -2,10 +2,10 @@
  * Simple Open EtherCAT Master Library 
  *
  * File    : ethercatprint.h
- * Version : 1.2.5
- * Date    : 09-04-2011
- * Copyright (C) 2005-2011 Speciaal Machinefabriek Ketels v.o.f.
- * Copyright (C) 2005-2011 Arthur Ketels
+ * Version : 1.3.0
+ * Date    : 24-02-2013
+ * Copyright (C) 2005-2013 Speciaal Machinefabriek Ketels v.o.f.
+ * Copyright (C) 2005-2013 Arthur Ketels
  * Copyright (C) 2008-2009 TU/e Technische Universiteit Eindhoven 
  *
  * SOEM is free software; you can redistribute it and/or modify it under
@@ -46,9 +46,22 @@
 #ifndef _ethercatprint_
 #define _ethercatprint_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 char* ec_sdoerror2string( uint16 sdoerrorcode);
 char* ec_ALstatuscode2string( uint16 ALstatuscode);
 char* ec_soeerror2string( uint16 errorcode);
+char* ecx_elist2string(ecx_contextt *context);
+
+#ifdef EC_VER1
 char* ec_elist2string(void);
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

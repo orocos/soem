@@ -2,10 +2,10 @@
  * Simple Open EtherCAT Master Library 
  *
  * File    : ethercatconfig.h
- * Version : 1.2.5
- * Date    : 09-04-2011
- * Copyright (C) 2005-2011 Speciaal Machinefabriek Ketels v.o.f.
- * Copyright (C) 2005-2011 Arthur Ketels
+ * Version : 1.3.0
+ * Date    : 24-02-2013
+ * Copyright (C) 2005-2013 Speciaal Machinefabriek Ketels v.o.f.
+ * Copyright (C) 2005-2013 Arthur Ketels
  * Copyright (C) 2008-2009 TU/e Technische Universiteit Eindhoven 
  *
  * SOEM is free software; you can redistribute it and/or modify it under
@@ -46,14 +46,30 @@
 #ifndef _ethercatconfig_
 #define _ethercatconfig_
 
-#define EC_NODEOFFSET		0x1000
-#define EC_TEMPNODE			0xffff
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
+#define EC_NODEOFFSET      0x1000
+#define EC_TEMPNODE        0xffff
+
+#ifdef EC_VER1
 int ec_config_init(uint8 usetable);
 int ec_config_map(void *pIOmap);
 int ec_config_map_group(void *pIOmap, uint8 group);
 int ec_config(uint8 usetable, void *pIOmap);
-int ec_recover_slave(uint16 slave);
-int ec_reconfig_slave(uint16 slave);
+int ec_recover_slave(uint16 slave, int timeout);
+int ec_reconfig_slave(uint16 slave, int timeout);
+#endif
+
+int ecx_config_init(ecx_contextt *context, uint8 usetable);
+int ecx_config_map_group(ecx_contextt *context, void *pIOmap, uint8 group);
+int ecx_recover_slave(ecx_contextt *context, uint16 slave, int timeout);
+int ecx_reconfig_slave(ecx_contextt *context, uint16 slave, int timeout);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -2,10 +2,10 @@
  * Simple Open EtherCAT Master Library 
  *
  * File    : ethercatdc.h
- * Version : 1.2.5
- * Date    : 09-04-2011
- * Copyright (C) 2005-2011 Speciaal Machinefabriek Ketels v.o.f.
- * Copyright (C) 2005-2011 Arthur Ketels
+ * Version : 1.3.0
+ * Date    : 24-02-2013
+ * Copyright (C) 2005-2013 Speciaal Machinefabriek Ketels v.o.f.
+ * Copyright (C) 2005-2013 Arthur Ketels
  * Copyright (C) 2008-2009 TU/e Technische Universiteit Eindhoven 
  *
  * SOEM is free software; you can redistribute it and/or modify it under
@@ -46,17 +46,23 @@
 #ifndef _EC_ECATDC_H
 #define _EC_ECATDC_H
 
-extern uint16 DCrefSlave;
-extern uint16 DClistN;
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * Set DC's of all slaves to sync with the first, measure propagation delays.
- *
- * return DCfound
- */
+#ifdef EC_VER1
 boolean ec_configdc();
-
 void ec_dcsync0(uint16 slave, boolean act, uint32 CyclTime, uint32 CyclShift);
 void ec_dcsync01(uint16 slave, boolean act, uint32 CyclTime0, uint32 CyclTime1, uint32 CyclShift);
+#endif
+
+boolean ecx_configdc(ecx_contextt *context);
+void ecx_dcsync0(ecx_contextt *context, uint16 slave, boolean act, uint32 CyclTime, uint32 CyclShift);
+void ecx_dcsync01(ecx_contextt *context, uint16 slave, boolean act, uint32 CyclTime0, uint32 CyclTime1, uint32 CyclShift);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _EC_ECATDC_H */
