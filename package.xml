@@ -16,12 +16,6 @@
   <!-- <url type="bugtracker"></url> -->
 
   <author>Arthur Ketels and M.J.G. van den Molengraft</author>
-  
-  <export>
-    <build_type>
-      cmake
-    </build_type>
-  </export>
 
-
+  <buildtool_depend>catkin</buildtool_depend>
 </package>

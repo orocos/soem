@@ -13,31 +13,19 @@ if(RTNET_INCLUDE_DIR AND ENABLE_RTNET)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${XENO_LDFLAGS} -lnative")
 endif()
 
-add_library(soem SHARED ethercatbase.c ethercatcoe.c ethercatconfig.c ethercatfoe.c ethercatsoe.c ethercatmain.c ethercatprint.c nicdrv.c ethercatdc.c) 
+add_library(soem SHARED ethercatbase.c ethercatcoe.c ethercatconfig.c ethercatfoe.c
+                        ethercatsoe.c ethercatmain.c ethercatprint.c ethercatdc.c   )
+ 
+target_link_libraries(soem osal oshw)
 
-add_executable(simple_test simple_test.c)
-target_link_libraries(simple_test soem m rt c pq pthread)
-
-add_executable(red_test red_test.c)
-target_link_libraries(red_test soem m rt c pq pthread)
-
-add_executable(slaveinfo slaveinfo.c)
-target_link_libraries(slaveinfo soem m rt c pq pthread)
-
-add_executable(eepromtool eepromtool.c)
-target_link_libraries(eepromtool soem m rt c pq pthread)
-
-add_executable(ebox ebox.c)
-target_link_libraries(ebox soem m rt c pq pthread)
-
-install(TARGETS soem simple_test red_test slaveinfo eepromtool ebox
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib)
+install(TARGETS soem
+  EXPORT SoemTargets
+  LIBRARY DESTINATION lib )
 
 install(FILES ethercatbase.h ethercatcoe.h ethercatconfig.h 
   ethercatconfiglist.h ethercatdc.h ethercatfoe.h 
   ethercatmain.h ethercatprint.h ethercatsoe.h 
-  ethercattype.h nicdrv.h
+  ethercattype.h
   DESTINATION include/soem )
 
 
