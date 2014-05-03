@@ -5,13 +5,13 @@
  
 # Compute paths
 get_filename_component(SOEM_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(SOEM_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(SOEM_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include/soem")
  
 # Our library dependencies (contains definitions for IMPORTED targets)
-if(NOT TARGET foo AND NOT soem_BINARY_DIR)
-  include("${SOEM_CMAKE_DIR}/soemTargets.cmake")
+if(NOT TARGET soem AND NOT soem_BINARY_DIR)
+  include("${SOEM_CMAKE_DIR}/SoemTargets.cmake")
 endif()
  
-# These are IMPORTED targets created by soemTargets.cmake
-set(SOEM_LIBRARIES foo)
-set(SOEM_EXECUTABLE bar)
+# These are IMPORTED targets created by SoemTargets.cmake
+set(SOEM_LIBRARIES osal oshw soem)
+
