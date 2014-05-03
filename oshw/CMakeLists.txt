@@ -11,5 +11,5 @@ install(TARGETS oshw
   LIBRARY DESTINATION lib )
 
 
-install(FILES oshw.h nicdrv.h
+install(FILES linux/oshw.h linux/nicdrv.h
         DESTINATION include/soem )
