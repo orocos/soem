@@ -1,17 +1,17 @@
 # - Config file for the soem package
 # It defines the following variables
-#  SOEM_INCLUDE_DIRS - include directories for soem
-#  SOEM_LIBRARIES    - libraries to link against
+#  soem_INCLUDE_DIRS - include directories for soem
+#  soem_LIBRARIES    - libraries to link against
  
 # Compute paths
-get_filename_component(SOEM_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(SOEM_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include/soem")
+get_filename_component(soem_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(soem_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include/soem")
  
 # Our library dependencies (contains definitions for IMPORTED targets)
 if(NOT TARGET soem AND NOT soem_BINARY_DIR)
-  include("${SOEM_CMAKE_DIR}/SoemTargets.cmake")
+  include("${soem_CMAKE_DIR}/SoemTargets.cmake")
 endif()
  
 # These are IMPORTED targets created by SoemTargets.cmake
-set(SOEM_LIBRARIES osal oshw soem)
+set(soem_LIBRARIES osal oshw soem)
 
