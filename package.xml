@@ -9,6 +9,7 @@
   </description>
 
   <maintainer email="ruben@intermodalics.eu"> Ruben Smits</maintainer>
+  <maintainer email="ros-orphaned-packages@googlegroups.com">ROS Orphaned Package Maintainers</maintainer>
 
   <license>GPL+linking exception</license>
 
