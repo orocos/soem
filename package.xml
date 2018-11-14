@@ -10,14 +10,20 @@
     but has been moved to GitHub and the OpenEtherCATsociety organisation
     https://github.com/OpenEtherCATsociety/SOEM.
 
-    This package contains the original SOEM C code provided by the Technische Universiteit Eindhoven.
-    It is not a development package for SOEM, but rather a wrapper to provide SOEM to ROS.
-    In the end, this just provides the CMake quirks that allows to release SOEM as a ROS package.
+    This package contains the original SOEM C code provided by the Technische Universiteit Eindhoven,
+    the development of which has been taken over by rt-labs (https://rt-labs.com/).
+    As the original source is down, it is not totally clear what the state of this package is with respect
+    to the upstream repository.
+    It is, however, approximately the one merged in https://github.com/OpenEtherCATsociety/SOEM/pull/1.
+
+    Disclaimer:
+    This package is not a development package for SOEM, but rather a wrapper to provide SOEM to ROS.
+    In the end, this just provides the CMake quirks that allows releasing SOEM as a ROS package.
 
     All bug reports regarding the original SOEM source code should go to the bugtracker at
     https://github.com/OpenEtherCATsociety/SOEM/issues.
 
-    All ROS related issues should target the bug tracker linked below.
+    All ROS related issues should target the bug tracker linked below (but might be redirected ;-)).
   </description>
 
   <maintainer email="matthias.gruhler@gmail.com">Matthias Gruhler</maintainer>
