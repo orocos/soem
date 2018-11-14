@@ -1,19 +1,32 @@
 <package>
   <name>soem</name>
   <version>1.3.0</version>
-  <description>SOEM is an open source EtherCAT master library written in c. Its
-     primary target is Linux but can be adapted to other OS and
-     embedded systems. (http://developer.berlios.de/projects/soem/)
+  <description>
+    SOEM is an open source EtherCAT master library written in C.
+    Its primary target is Linux but can be adapted to other OS and
+    embedded systems.
 
-     This package contains the original soem c code provided by the Technische Universiteit Eindhoven.
+    SOEM has originally been hosted at http://developer.berlios.de/projects/soem/
+    but has been moved to GitHub and the OpenEtherCATsociety organisation
+    https://github.com/OpenEtherCATsociety/SOEM.
+
+    This package contains the original SOEM C code provided by the Technische Universiteit Eindhoven.
+    It is not a development package for SOEM, but rather a wrapper to provide SOEM to ROS.
+    In the end, this just provides the CMake quirks that allows to release SOEM as a ROS package.
+
+    All bug reports regarding the original SOEM source code should go to the bugtracker at
+    https://github.com/OpenEtherCATsociety/SOEM/issues.
+
+    All ROS related issues should target the bug tracker linked below.
   </description>
 
   <maintainer email="matthias.gruhler@gmail.com">Matthias Gruhler</maintainer>
 
   <license>GPL+linking exception</license>
 
-  <url type="website">http://developer.berlios.de/projects/soem</url>
-  <!-- <url type="bugtracker"></url> -->
+  <url type="website">http://openethercatsociety.github.io/</url>
+  <url type="website">http://wiki.ros.org/soem</url>
+  <url type="bugtracker">https://github.com/mgruhler/soem/issues</url>
 
   <author>Arthur Ketels and M.J.G. van den Molengraft</author>
 
