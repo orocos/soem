@@ -11,26 +11,16 @@
  * -i      display EEPROM information
  * -walias write slave alias in EEPROM
  *
- * (c)Arthur Ketels 2010-2012 
+ * (c)Arthur Ketels 2010-2012
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <time.h>
 
-#include "ethercattype.h"
-#include "nicdrv.h"
-#include "ethercatbase.h"
-#include "ethercatmain.h"
-#include "ethercatcoe.h"
-//#include "ethercatfoe.h"
-//#include "ethercatconfig.h"
-//#include "ethercatprint.h"
+#include "ethercat.h"
 
-#define MAXBUF 32768
+#define MAXBUF 524288
 #define STDBUF 2048
 #define MINBUF 128
 #define CRCBUF 14
@@ -51,7 +41,7 @@ uint16 ow;
 int os;
 int slave;
 int alias;
-struct timeval tstart,tend, tdif;
+ec_timet tstart,tend, tdif;
 int wkc;
 int mode;
 char sline[MAXSLENGTH];
@@ -68,49 +58,49 @@ void calc_crc(uint8 *crc, uint8 b)
         *crc = (*crc << 1) ^ 0x07;
      else
         *crc = (*crc << 1);
-   }  
+   }
 }
 
 uint16 SIIcrc(uint8 *buf)
 {
-   int i; 
+   int i;
    uint8 crc;
-    
-   crc = 0xff; 
+
+   crc = 0xff;
    for( i = 0 ; i <= 13 ; i++ )
    {
-      calc_crc(&crc , *(buf++));  
-   } 
+      calc_crc(&crc , *(buf++));
+   }
    return (uint16)crc;
 }
 
 int input_bin(char *fname, int *length)
 {
    FILE *fp;
- 
+
    int cc = 0, c;
 
    fp = fopen(fname, "rb");
-   if(fp == NULL) 
+   if(fp == NULL)
       return 0;
    while (((c = fgetc(fp)) != EOF) && (cc < MAXBUF))
       ebuf[cc++] = (uint8)c;
    *length = cc;
    fclose(fp);
-   
+
    return 1;
 }
 
 int input_intelhex(char *fname, int *start, int *length)
 {
    FILE *fp;
- 
+
    int c, sc, retval = 1;
    int ll, ladr, lt, sn, i, lval;
    int hstart, hlength, sum;
 
    fp = fopen(fname, "r");
-   if(fp == NULL) 
+   if(fp == NULL)
       return 0;
    hstart = MAXBUF;
    hlength = 0;
@@ -151,7 +141,7 @@ int input_intelhex(char *fname, int *start, int *length)
                printf("Invalid checksum.\n");
             }
          }
-      }      
+      }
    }
    while (c != EOF);
    if (retval)
@@ -160,34 +150,34 @@ int input_intelhex(char *fname, int *start, int *length)
       *start = hstart;
    }
    fclose(fp);
-   
+
    return retval;
 }
 
 int output_bin(char *fname, int length)
 {
    FILE *fp;
- 
+
    int cc;
 
    fp = fopen(fname, "wb");
-   if(fp == NULL) 
+   if(fp == NULL)
       return 0;
    for (cc = 0 ; cc < length ; cc++)
       fputc( ebuf[cc], fp);
    fclose(fp);
-   
+
    return 1;
 }
 
 int output_intelhex(char *fname, int length)
 {
    FILE *fp;
- 
+
    int cc = 0, ll, sum, i;
 
    fp = fopen(fname, "w");
-   if(fp == NULL) 
+   if(fp == NULL)
       return 0;
    while (cc < length)
    {
@@ -203,31 +193,31 @@ int output_intelhex(char *fname, int length)
       fprintf(fp, "%2.2X\n", (0x100 - sum) & 0xff);
       cc += ll;
    }
-   fprintf(fp, ":00000001FF\n");   
+   fprintf(fp, ":00000001FF\n");
    fclose(fp);
-   
+
    return 1;
 }
 
 int eeprom_read(int slave, int start, int length)
 {
-   int i, wkc, ainc = 4;
+   int i, ainc = 4;
    uint16 estat, aiadr;
    uint32 b4;
    uint64 b8;
    uint8 eepctl;
-   
+
    if((ec_slavecount >= slave) && (slave > 0) && ((start + length) <= MAXBUF))
    {
       aiadr = 1 - slave;
       eepctl = 2;
-      wkc = ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* force Eeprom from PDI */
+      ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* force Eeprom from PDI */
       eepctl = 0;
-      wkc = ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* set Eeprom to master */
+      ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* set Eeprom to master */
 
       estat = 0x0000;
       aiadr = 1 - slave;
-      wkc=ec_APRD(aiadr, ECT_REG_EEPSTAT, sizeof(estat), &estat, EC_TIMEOUTRET); /* read eeprom status */
+      ec_APRD(aiadr, ECT_REG_EEPSTAT, sizeof(estat), &estat, EC_TIMEOUTRET); /* read eeprom status */
       estat = etohs(estat);
       if (estat & EC_ESTAT_R64)
       {
@@ -235,54 +225,53 @@ int eeprom_read(int slave, int start, int length)
          for (i = start ; i < (start + length) ; i+=ainc)
          {
             b8 = ec_readeepromAP(aiadr, i >> 1 , EC_TIMEOUTEEP);
-            ebuf[i] = b8;
-            ebuf[i+1] = b8 >> 8;
-            ebuf[i+2] = b8 >> 16;
-            ebuf[i+3] = b8 >> 24;
-            ebuf[i+4] = b8 >> 32;
-            ebuf[i+5] = b8 >> 40;
-            ebuf[i+6] = b8 >> 48;
-            ebuf[i+7] = b8 >> 56;
+            ebuf[i] = b8 & 0xFF;
+            ebuf[i+1] = (b8 >> 8) & 0xFF;
+            ebuf[i+2] = (b8 >> 16) & 0xFF;
+            ebuf[i+3] = (b8 >> 24) & 0xFF;
+            ebuf[i+4] = (b8 >> 32) & 0xFF;
+            ebuf[i+5] = (b8 >> 40) & 0xFF;
+            ebuf[i+6] = (b8 >> 48) & 0xFF;
+            ebuf[i+7] = (b8 >> 56) & 0xFF;
          }
       }
       else
       {
          for (i = start ; i < (start + length) ; i+=ainc)
          {
-            b4 = ec_readeepromAP(aiadr, i >> 1 , EC_TIMEOUTEEP);
-            ebuf[i] = b4;
-            ebuf[i+1] = b4 >> 8;
-            ebuf[i+2] = b4 >> 16;
-            ebuf[i+3] = b4 >> 24;
+            b4 = ec_readeepromAP(aiadr, i >> 1 , EC_TIMEOUTEEP) & 0xFFFFFFFF;
+            ebuf[i] = b4 & 0xFF;
+            ebuf[i+1] = (b4 >> 8) & 0xFF;
+            ebuf[i+2] = (b4 >> 16) & 0xFF;
+            ebuf[i+3] = (b4 >> 24) & 0xFF;
          }
       }
-      
+
       return 1;
    }
-   
+
    return 0;
 }
 
 int eeprom_write(int slave, int start, int length)
 {
-   int i, wkc, dc = 0;
+   int i, dc = 0;
    uint16 aiadr, *wbuf;
    uint8 eepctl;
-   int ret;
-   
+
    if((ec_slavecount >= slave) && (slave > 0) && ((start + length) <= MAXBUF))
    {
       aiadr = 1 - slave;
       eepctl = 2;
-      wkc = ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* force Eeprom from PDI */
+      ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* force Eeprom from PDI */
       eepctl = 0;
-      wkc = ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* set Eeprom to master */
+      ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* set Eeprom to master */
 
       aiadr = 1 - slave;
       wbuf = (uint16 *)&ebuf[0];
       for (i = start ; i < (start + length) ; i+=2)
       {
-         ret = ec_writeeepromAP(aiadr, i >> 1 , *(wbuf + (i >> 1)), EC_TIMEOUTEEP);
+         ec_writeeepromAP(aiadr, i >> 1 , *(wbuf + (i >> 1)), EC_TIMEOUTEEP);
          if (++dc >= 100)
          {
             dc = 0;
@@ -290,35 +279,34 @@ int eeprom_write(int slave, int start, int length)
             fflush(stdout);
          }
       }
-      
+
       return 1;
    }
-   
+
    return 0;
 }
 
 int eeprom_writealias(int slave, int alias, uint16 crc)
 {
-   int wkc;
    uint16 aiadr;
    uint8 eepctl;
    int ret;
-   
+
    if((ec_slavecount >= slave) && (slave > 0) && (alias <= 0xffff))
    {
       aiadr = 1 - slave;
       eepctl = 2;
-      wkc = ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* force Eeprom from PDI */
+      ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* force Eeprom from PDI */
       eepctl = 0;
-      wkc = ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* set Eeprom to master */
+      ec_APWR(aiadr, ECT_REG_EEPCFG, sizeof(eepctl), &eepctl , EC_TIMEOUTRET); /* set Eeprom to master */
 
       ret = ec_writeeepromAP(aiadr, 0x04 , alias, EC_TIMEOUTEEP);
       if (ret)
         ret = ec_writeeepromAP(aiadr, 0x07 , crc, EC_TIMEOUTEEP);
-        
+
       return ret;
    }
-   
+
    return 0;
 }
 
@@ -326,10 +314,10 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
 {
    int w, rc = 0, estart, esize;
    uint16 *wbuf;
-   
+
    /* initialise SOEM, bind socket to ifname */
    if (ec_init(ifname))
-   {   
+   {
       printf("ec_init on %s succeeded.\n",ifname);
 
       w = 0x0000;
@@ -343,7 +331,7 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
          {
             if ((mode == MODE_INFO) || (mode == MODE_READBIN) || (mode == MODE_READINTEL))
             {
-               rc =  gettimeofday(&tstart, NULL);
+               tstart = osal_current_time();
                eeprom_read(slave, 0x0000, MINBUF); // read first 128 bytes
 
                wbuf = (uint16 *)&ebuf[0];
@@ -352,7 +340,7 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
                printf(" PDI Config       : %4.4X\n",*(wbuf + 0x01));
                printf(" Config Alias     : %4.4X\n",*(wbuf + 0x04));
                printf(" Checksum         : %4.4X\n",*(wbuf + 0x07));
-               printf("   calculated     : %4.4X\n",SIIcrc(&ebuf[0])); 
+               printf("   calculated     : %4.4X\n",SIIcrc(&ebuf[0]));
                printf(" Vendor ID        : %8.8X\n",*(uint32 *)(wbuf + 0x08));
                printf(" Product Code     : %8.8X\n",*(uint32 *)(wbuf + 0x0A));
                printf(" Revision Number  : %8.8X\n",*(uint32 *)(wbuf + 0x0C));
@@ -368,12 +356,12 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
                if (esize > MINBUF)
                   eeprom_read(slave, MINBUF, esize - MINBUF); // read reminder
 
-               rc =  gettimeofday(&tend, NULL);
-               timersub(&tend, &tstart, &tdif);
+               tend = osal_current_time();
+               osal_time_diff(&tstart, &tend, &tdif);
                if (mode == MODE_READINTEL) output_intelhex(fname, esize);
                if (mode == MODE_READBIN)   output_bin(fname, esize);
 
-               printf("\nTotal EEPROM read time :%ldms\n", (tdif.tv_usec+(tdif.tv_sec*1000000L)) / 1000);
+               printf("\nTotal EEPROM read time :%ldms\n", (tdif.usec+(tdif.sec*1000000L)) / 1000);
             }
             if ((mode == MODE_WRITEBIN) || (mode == MODE_WRITEINTEL))
             {
@@ -382,7 +370,7 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
                if (mode == MODE_WRITEBIN)   rc = input_bin(fname, &esize);
 
                if (rc > 0)
-               {               
+               {
                   wbuf = (uint16 *)&ebuf[0];
                   printf("Slave %d\n", slave);
                   printf(" Vendor ID        : %8.8X\n",*(uint32 *)(wbuf + 0x08));
@@ -392,34 +380,34 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
 
                   printf("Busy");
                   fflush(stdout);
-                  rc =  gettimeofday(&tstart, NULL);
+                  tstart = osal_current_time();
                   eeprom_write(slave, estart, esize);
-                  rc =  gettimeofday(&tend, NULL);               
-                  timersub(&tend, &tstart, &tdif);
+                  tend = osal_current_time();
+                  osal_time_diff(&tstart, &tend, &tdif);
 
-                  printf("\nTotal EEPROM write time :%ldms\n", (tdif.tv_usec+(tdif.tv_sec*1000000L)) / 1000);
+                  printf("\nTotal EEPROM write time :%ldms\n", (tdif.usec+(tdif.sec*1000000L)) / 1000);
                }
                else
-                  printf("Error reading file, abort.\n"); 
+                  printf("Error reading file, abort.\n");
             }
             if (mode == MODE_WRITEALIAS)
             {
                if( eeprom_read(slave, 0x0000, CRCBUF) ) // read first 14 bytes
                {
                   wbuf = (uint16 *)&ebuf[0];
-                  *(wbuf + 0x04) = alias;  
+                  *(wbuf + 0x04) = alias;
                   if(eeprom_writealias(slave, alias, SIIcrc(&ebuf[0])))
                   {
                      printf("Alias %4.4X written successfully to slave %d\n", alias, slave);
-                  } 
+                  }
                   else
                   {
                      printf("Alias not written\n");
                   }
-               }  
+               }
                else
                {
-                  printf("Could not read slave EEPROM");    
+                  printf("Could not read slave EEPROM");
                }
             }
          }
@@ -440,7 +428,7 @@ void eepromtool(char *ifname, int slave, int mode, char *fname)
    {
       printf("No socket connection on %s\nExcecute as root\n",ifname);
    }
-}   
+}
 
 int main(int argc, char *argv[])
 {
@@ -448,7 +436,7 @@ int main(int argc, char *argv[])
 
    mode = MODE_NONE;
    if (argc > 3)
-   {      
+   {
       slave = atoi(argv[2]);
       if ((strncmp(argv[3], "-i", sizeof("-i")) == 0))   mode = MODE_INFO;
       if (argc > 4)
@@ -477,9 +465,9 @@ int main(int argc, char *argv[])
       printf("    -ri     read EEPROM, output Intel Hex format\n");
       printf("    -w      write EEPROM, input binary format\n");
       printf("    -wi     write EEPROM, input Intel Hex format\n");
-   }   
-   
+   }
+
    printf("End program\n");
-   
+
    return (0);
 }

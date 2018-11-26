@@ -7,7 +7,7 @@
  *
  * This is a redundancy test.
  *
- * (c)Arthur Ketels 2008 
+ * (c)Arthur Ketels 2008
  */
 
 #include <stdio.h>
@@ -21,14 +21,7 @@
 #include <pthread.h>
 #include <math.h>
 
-#include "ethercattype.h"
-#include "nicdrv.h"
-#include "ethercatbase.h"
-#include "ethercatmain.h"
-#include "ethercatcoe.h"
-#include "ethercatconfig.h"
-#include "ethercatdc.h"
-#include "ethercatprint.h"
+#include "ethercat.h"
 
 #define NSEC_PER_SEC 1000000000
 #define EC_TIMEOUTMON 500
@@ -44,8 +37,6 @@ int DCdiff;
 int os;
 uint8 ob;
 uint16 ob2;
-pthread_cond_t      cond  = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t     mutex = PTHREAD_MUTEX_INITIALIZER;
 uint8 *digout = 0;
 int expectedWKC;
 boolean needlf;
@@ -57,12 +48,13 @@ uint8 currentgroup = 0;
 void redtest(char *ifname, char *ifname2)
 {
    int cnt, i, j, oloop, iloop;
-   
+
    printf("Starting Redundant test\n");
-   
+
    /* initialise SOEM, bind socket to ifname */
-   if (ec_init_redundant(ifname, ifname2))
-   {   
+//   if (ec_init_redundant(ifname, ifname2))
+   if (ec_init(ifname))
+   {
       printf("ec_init on %s succeeded.\n",ifname);
       /* find and auto-config slaves */
       if ( ec_config(FALSE, &IOmap) > 0 )
@@ -70,10 +62,10 @@ void redtest(char *ifname, char *ifname2)
          printf("%d slaves found and configured.\n",ec_slavecount);
          /* wait for all slaves to reach SAFE_OP state */
          ec_statecheck(0, EC_STATE_SAFE_OP,  EC_TIMEOUTSTATE);
-         
+
          /* configure DC options for every DC capable slave found in the list */
          ec_configdc();
-                  
+
          /* read indevidual slave state and store in ec_slave[] */
          ec_readstate();
          for(cnt = 1; cnt <= ec_slavecount ; cnt++)
@@ -87,7 +79,7 @@ void redtest(char *ifname, char *ifname2)
             if( !digout && ((ec_slave[cnt].eep_id == 0x0af83052) || (ec_slave[cnt].eep_id == 0x07d83052)))
             {
                digout = ec_slave[cnt].outputs;
-            }   
+            }
          }
          expectedWKC = (ec_group[0].outputsWKC * 2) + ec_group[0].inputsWKC;
          printf("Calculated workcounter %d\n", expectedWKC);
@@ -123,7 +115,7 @@ void redtest(char *ifname, char *ifname2)
                for(j = 0 ; j < iloop; j++)
                {
                   printf(" %2.2x", *(ec_slave[0].inputs + j));
-               }   
+               }
                printf("\r");
                fflush(stdout);
                osal_usleep(20000);
@@ -143,7 +135,7 @@ void redtest(char *ifname, char *ifname2)
                          i, ec_slave[i].state, ec_slave[i].ALstatuscode, ec_ALstatuscode2string(ec_slave[i].ALstatuscode));
                  }
              }
-         }         
+         }
          printf("Request safe operational state for all slaves\n");
          ec_slave[0].state = EC_STATE_SAFE_OP;
          /* request SAFE_OP state for all slaves */
@@ -160,25 +152,25 @@ void redtest(char *ifname, char *ifname2)
    else
    {
       printf("No socket connection on %s\nExcecute as root\n",ifname);
-   }   
-}   
+   }
+}
 
 /* add ns to timespec */
 void add_timespec(struct timespec *ts, int64 addtime)
 {
    int64 sec, nsec;
-   
+
    nsec = addtime % NSEC_PER_SEC;
    sec = (addtime - nsec) / NSEC_PER_SEC;
    ts->tv_sec += sec;
    ts->tv_nsec += nsec;
-   if ( ts->tv_nsec > NSEC_PER_SEC ) 
-   { 
+   if ( ts->tv_nsec > NSEC_PER_SEC )
+   {
       nsec = ts->tv_nsec % NSEC_PER_SEC;
       ts->tv_sec += (ts->tv_nsec - nsec) / NSEC_PER_SEC;
       ts->tv_nsec = nsec;
-   }   
-}   
+   }
+}
 
 /* PI calculation to get linux time synced to DC time */
 void ec_sync(int64 reftime, int64 cycletime , int64 *offsettime)
@@ -192,50 +184,47 @@ void ec_sync(int64 reftime, int64 cycletime , int64 *offsettime)
    if(delta<0){ integral--; }
    *offsettime = -(delta / 100) - (integral / 20);
    gl_delta = delta;
-}   
+}
 
 /* RT EtherCAT thread */
-void ecatthread( void *ptr )
+OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
 {
    struct timespec   ts, tleft;
-   struct timeval    tp;
-   int rc;
    int ht;
    int64 cycletime;
-   
-   rc = pthread_mutex_lock(&mutex);
-   rc = clock_gettime(CLOCK_MONOTONIC, &ts);
+
+   clock_gettime(CLOCK_MONOTONIC, &ts);
    ht = (ts.tv_nsec / 1000000) + 1; /* round to nearest ms */
    ts.tv_nsec = ht * 1000000;
    cycletime = *(int*)ptr * 1000; /* cycletime in ns */
    toff = 0;
    dorun = 0;
-   ec_send_processdata();    
+   ec_send_processdata();
    while(1)
-   {   
+   {
       /* calculate next cycle start */
       add_timespec(&ts, cycletime + toff);
       /* wait to cycle start */
-      rc = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, &tleft);
+      clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, &tleft);
       if (dorun>0)
       {
          wkc = ec_receive_processdata(EC_TIMEOUTRET);
-         
+
          dorun++;
          /* if we have some digital output, cycle */
-         if( digout ) *digout = (uint8) ((dorun / 16) & 0xff); 
-         
+         if( digout ) *digout = (uint8) ((dorun / 16) & 0xff);
+
          if (ec_slave[0].hasdc)
-         {   
+         {
             /* calulate toff to get linux time and DC synced */
             ec_sync(ec_DCtime, cycletime, &toff);
-         }   
-         ec_send_processdata();    
-      }   
-   }    
+         }
+         ec_send_processdata();
+      }
+   }
 }
 
-void ecatcheck( void *ptr )
+OSAL_THREAD_FUNC ecatcheck( void *ptr )
 {
     int slave;
 
@@ -266,41 +255,41 @@ void ecatcheck( void *ptr )
                   {
                      printf("WARNING : slave %d is in SAFE_OP, change to OPERATIONAL.\n", slave);
                      ec_slave[slave].state = EC_STATE_OPERATIONAL;
-                     ec_writestate(slave);                              
+                     ec_writestate(slave);
                   }
-                  else if(ec_slave[slave].state > 0)
+                  else if(ec_slave[slave].state > EC_STATE_NONE)
                   {
                      if (ec_reconfig_slave(slave, EC_TIMEOUTMON))
                      {
                         ec_slave[slave].islost = FALSE;
-                        printf("MESSAGE : slave %d reconfigured\n",slave);                           
+                        printf("MESSAGE : slave %d reconfigured\n",slave);
                      }
-                  } 
+                  }
                   else if(!ec_slave[slave].islost)
                   {
                      /* re-check state */
                      ec_statecheck(slave, EC_STATE_OPERATIONAL, EC_TIMEOUTRET);
-                     if (!ec_slave[slave].state)
+                     if (ec_slave[slave].state == EC_STATE_NONE)
                      {
                         ec_slave[slave].islost = TRUE;
-                        printf("ERROR : slave %d lost\n",slave);                           
+                        printf("ERROR : slave %d lost\n",slave);
                      }
                   }
                }
                if (ec_slave[slave].islost)
                {
-                  if(!ec_slave[slave].state)
+                  if(ec_slave[slave].state == EC_STATE_NONE)
                   {
                      if (ec_recover_slave(slave, EC_TIMEOUTMON))
                      {
                         ec_slave[slave].islost = FALSE;
-                        printf("MESSAGE : slave %d recovered\n",slave);                           
+                        printf("MESSAGE : slave %d recovered\n",slave);
                      }
                   }
                   else
                   {
                      ec_slave[slave].islost = FALSE;
-                     printf("MESSAGE : slave %d found\n",slave);                           
+                     printf("MESSAGE : slave %d found\n",slave);
                   }
                }
             }
@@ -308,37 +297,27 @@ void ecatcheck( void *ptr )
                printf("OK : all slaves resumed OPERATIONAL.\n");
         }
         osal_usleep(10000);
-    }   
-}   
+    }
+}
+
+#define stack64k (64 * 1024)
 
 int main(int argc, char *argv[])
 {
-   int iret1, iret2;
    int ctime;
-   struct sched_param    param;
-   int                   policy = SCHED_OTHER;
-   
+
    printf("SOEM (Simple Open EtherCAT Master)\nRedundancy test\n");
-   
-   memset(&schedp, 0, sizeof(schedp));
-   /* do not set priority above 49, otherwise sockets are starved */
-   schedp.sched_priority = 30;
-   sched_setscheduler(0, SCHED_FIFO, &schedp);
-   
+
    if (argc > 3)
-   {      
+   {
       dorun = 0;
       ctime = atoi(argv[3]);
 
       /* create RT thread */
-      iret1 = pthread_create( &thread1, NULL, (void *) &ecatthread, (void*) &ctime);   
-      memset(&param, 0, sizeof(param));
-      /* give it higher priority */
-      param.sched_priority = 40;
-      iret1 = pthread_setschedparam(thread1, policy, &param);
+      osal_thread_create_rt(&thread1, stack64k * 2, &ecatthread, (void*) &ctime);
 
       /* create thread to handle slave error handling in OP */
-      iret2 = pthread_create( &thread2, NULL, (void *) &ecatcheck, (void*) &ctime);   
+      osal_thread_create(&thread2, stack64k * 4, &ecatcheck, NULL);
 
       /* start acyclic part */
       redtest(argv[1],argv[2]);
@@ -346,10 +325,7 @@ int main(int argc, char *argv[])
    else
    {
       printf("Usage: red_test ifname1 ifname2 cycletime\nifname = eth0 for example\ncycletime in us\n");
-   }   
-   
-   schedp.sched_priority = 0;
-   sched_setscheduler(0, SCHED_OTHER, &schedp);
+   }
 
    printf("End program\n");
 

@@ -18,14 +18,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "ethercattype.h"
-#include "nicdrv.h"
-#include "ethercatbase.h"
-#include "ethercatmain.h"
-#include "ethercatcoe.h"
-#include "ethercatfoe.h"
-#include "ethercatconfig.h"
-#include "ethercatprint.h"
+#include "ethercat.h"
 
 #define FWBUFSIZE (8 * 1024 * 1024)
 
@@ -41,11 +34,11 @@ uint16 argslave;
 int input_bin(char *fname, int *length)
 {
     FILE *fp;
- 
+
 	int cc = 0, c;
 
     fp = fopen(fname, "rb");
-    if(fp == NULL) 
+    if(fp == NULL)
         return 0;
 	while (((c = fgetc(fp)) != EOF) && (cc < FWBUFSIZE))
 		filebuffer[cc++] = (uint8)c;
@@ -56,12 +49,12 @@ int input_bin(char *fname, int *length)
 
 
 void boottest(char *ifname, uint16 slave, char *filename)
-{	
+{
 	printf("Starting firmware update example\n");
-	
+
 	/* initialise SOEM, bind socket to ifname */
 	if (ec_init(ifname))
-	{	
+	{
 		printf("ec_init on %s succeeded.\n",ifname);
 		/* find and auto-config slaves */
 
@@ -69,7 +62,7 @@ void boottest(char *ifname, uint16 slave, char *filename)
 	    if ( ec_config_init(FALSE) > 0 )
 		{
 			printf("%d slaves found and configured.\n",ec_slavecount);
-			
+
 			printf("Request init state for slave %d\n", slave);
 			ec_slave[slave].state = EC_STATE_INIT;
 			ec_writestate(slave);
@@ -104,7 +97,7 @@ void boottest(char *ifname, uint16 slave, char *filename)
 			ec_FPWR (ec_slave[slave].configadr, ECT_REG_SM0, sizeof(ec_smt), &ec_slave[slave].SM[0], EC_TIMEOUTRET);
 			/* program SM1 mailbox out for slave */
 			ec_FPWR (ec_slave[slave].configadr, ECT_REG_SM1, sizeof(ec_smt), &ec_slave[slave].SM[1], EC_TIMEOUTRET);
-			
+
 			printf("Request BOOT state for slave %d\n", slave);
 			ec_slave[slave].state = EC_STATE_BOOT;
 			ec_writestate(slave);
@@ -140,15 +133,15 @@ void boottest(char *ifname, uint16 slave, char *filename)
 	else
 	{
 		printf("No socket connection on %s\nExcecute as root\n",ifname);
-	}	
-}	
+	}
+}
 
 int main(int argc, char *argv[])
 {
 	printf("SOEM (Simple Open EtherCAT Master)\nFirmware update example\n");
 
 	if (argc > 3)
-	{		
+	{
 		argslave = atoi(argv[2]);
 		boottest(argv[1], argslave, argv[3]);
 	}
@@ -159,8 +152,8 @@ int main(int argc, char *argv[])
 		printf("slave = slave number in EtherCAT order 1..n\n");
 		printf("fname = binary file to store in slave\n");
 		printf("CAUTION! Using the wrong file can result in a bricked slave!\n");
-	}	
-	
+	}
+
 	printf("End program\n");
 	return (0);
 }

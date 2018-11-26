@@ -11,24 +11,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <pthread.h>
+#include <inttypes.h>
 
-#include "ethercattype.h"
-#include "nicdrv.h"
-#include "ethercatbase.h"
-#include "ethercatmain.h"
-#include "ethercatdc.h"
-#include "ethercatcoe.h"
-#include "ethercatfoe.h"
-#include "ethercatconfig.h"
-#include "ethercatprint.h"
+#include "ethercat.h"
 
 #define EC_TIMEOUTMON 500
 
 char IOmap[4096];
-pthread_t thread1;
+OSAL_THREAD_HANDLE thread1;
 int expectedWKC;
 boolean needlf;
 volatile int wkc;
@@ -37,15 +27,15 @@ uint8 currentgroup = 0;
 
 void simpletest(char *ifname)
 {
-    int i, j, oloop, iloop, wkc_count, chk;
+    int i, j, oloop, iloop, chk;
     needlf = FALSE;
     inOP = FALSE;
 
    printf("Starting simple test\n");
-   
+
    /* initialise SOEM, bind socket to ifname */
    if (ec_init(ifname))
-   {   
+   {
       printf("ec_init on %s succeeded.\n",ifname);
       /* find and auto-config slaves */
 
@@ -92,7 +82,6 @@ void simpletest(char *ifname)
          if (ec_slave[0].state == EC_STATE_OPERATIONAL )
          {
             printf("Operational state reached for all slaves.\n");
-            wkc_count = 0;
             inOP = TRUE;
                 /* cyclic loop */
             for(i = 1; i <= 10000; i++)
@@ -109,16 +98,16 @@ void simpletest(char *ifname)
                             printf(" %2.2x", *(ec_slave[0].outputs + j));
                         }
 
-                        printf(" I:");                  
+                        printf(" I:");
                         for(j = 0 ; j < iloop; j++)
                         {
                             printf(" %2.2x", *(ec_slave[0].inputs + j));
-                        }   
-                        printf(" T:%lld\r",ec_DCtime);
+                        }
+                        printf(" T:%"PRId64"\r",ec_DCtime);
                         needlf = TRUE;
                     }
-                    usleep(5000);
-                    
+                    osal_usleep(5000);
+
                 }
                 inOP = FALSE;
             }
@@ -134,7 +123,7 @@ void simpletest(char *ifname)
                             i, ec_slave[i].state, ec_slave[i].ALstatuscode, ec_ALstatuscode2string(ec_slave[i].ALstatuscode));
                     }
                 }
-            }           
+            }
             printf("\nRequest init state for all slaves\n");
             ec_slave[0].state = EC_STATE_INIT;
             /* request INIT state for all slaves */
@@ -151,12 +140,13 @@ void simpletest(char *ifname)
     else
     {
         printf("No socket connection on %s\nExcecute as root\n",ifname);
-    }   
-}   
+    }
+}
 
-void ecatcheck( void *ptr )
+OSAL_THREAD_FUNC ecatcheck( void *ptr )
 {
     int slave;
+    (void)ptr;                  /* Not used */
 
     while(1)
     {
@@ -185,68 +175,68 @@ void ecatcheck( void *ptr )
                   {
                      printf("WARNING : slave %d is in SAFE_OP, change to OPERATIONAL.\n", slave);
                      ec_slave[slave].state = EC_STATE_OPERATIONAL;
-                     ec_writestate(slave);                              
+                     ec_writestate(slave);
                   }
-                  else if(ec_slave[slave].state > 0)
+                  else if(ec_slave[slave].state > EC_STATE_NONE)
                   {
                      if (ec_reconfig_slave(slave, EC_TIMEOUTMON))
                      {
                         ec_slave[slave].islost = FALSE;
-                        printf("MESSAGE : slave %d reconfigured\n",slave);                           
+                        printf("MESSAGE : slave %d reconfigured\n",slave);
                      }
-                  } 
+                  }
                   else if(!ec_slave[slave].islost)
                   {
                      /* re-check state */
                      ec_statecheck(slave, EC_STATE_OPERATIONAL, EC_TIMEOUTRET);
-                     if (!ec_slave[slave].state)
+                     if (ec_slave[slave].state == EC_STATE_NONE)
                      {
                         ec_slave[slave].islost = TRUE;
-                        printf("ERROR : slave %d lost\n",slave);                           
+                        printf("ERROR : slave %d lost\n",slave);
                      }
                   }
                }
                if (ec_slave[slave].islost)
                {
-                  if(!ec_slave[slave].state)
+                  if(ec_slave[slave].state == EC_STATE_NONE)
                   {
                      if (ec_recover_slave(slave, EC_TIMEOUTMON))
                      {
                         ec_slave[slave].islost = FALSE;
-                        printf("MESSAGE : slave %d recovered\n",slave);                           
+                        printf("MESSAGE : slave %d recovered\n",slave);
                      }
                   }
                   else
                   {
                      ec_slave[slave].islost = FALSE;
-                     printf("MESSAGE : slave %d found\n",slave);                           
+                     printf("MESSAGE : slave %d found\n",slave);
                   }
                }
             }
             if(!ec_group[currentgroup].docheckstate)
                printf("OK : all slaves resumed OPERATIONAL.\n");
         }
-        usleep(10000);
-    }   
-}   
+        osal_usleep(10000);
+    }
+}
 
 int main(int argc, char *argv[])
 {
-    int iret1;
    printf("SOEM (Simple Open EtherCAT Master)\nSimple test\n");
 
    if (argc > 1)
-   {      
+   {
       /* create thread to handle slave error handling in OP */
-      iret1 = pthread_create( &thread1, NULL, (void *) &ecatcheck, (void*) &ctime);   
+//      pthread_create( &thread1, NULL, (void *) &ecatcheck, (void*) &ctime);
+      osal_thread_create(&thread1, 128000, &ecatcheck, (void*) &ctime);
       /* start cyclic part */
       simpletest(argv[1]);
    }
    else
    {
       printf("Usage: simple_test ifname1\nifname = eth0 for example\n");
-   }   
-   
+   }
+
    printf("End program\n");
    return (0);
 }
