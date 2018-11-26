@@ -1,4 +1,6 @@
-#To compile for ROS
+# SOEM ROS Catkin Package
+
+## To compile for ROS
 
 Clone the Package to the catkin workspace
 
@@ -9,7 +11,7 @@ catkin_make
 --------------------------------------------------------------
 
 
-#To compile for linux:
+## To compile for linux:
 
 go to project directory
 ```
@@ -21,7 +23,7 @@ Please read the doxygen documentation in doc/html/index.html
 
 --------------------------------------------------------------
 
-#To complie for windows:
+## To complie for windows:
 
 go to project directory 
 
