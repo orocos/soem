@@ -25,7 +25,7 @@ install(TARGETS soem
 install(FILES ethercatbase.h ethercatcoe.h ethercatconfig.h 
   ethercatconfiglist.h ethercatdc.h ethercatfoe.h 
   ethercatmain.h ethercatprint.h ethercatsoe.h 
-  ethercattype.h
+  ethercattype.h osal.h osal_defs.h
   DESTINATION include/soem )
 
 
