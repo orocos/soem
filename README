@@ -1,16 +1,27 @@
-To compile for linux:
+#To compile for ROS
+
+Clone the Package to the catkin workspace
+
+Source the ROS workspace
+```
+catkin_make
+```
+--------------------------------------------------------------
+
+
+#To compile for linux:
 
 go to project directory
-
+```
 source ./setup.sh linux
 
 make all
-
+```
 Please read the doxygen documentation in doc/html/index.html
 
 --------------------------------------------------------------
 
-To complie for windows:
+#To complie for windows:
 
 go to project directory 
 
