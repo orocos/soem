@@ -74,6 +74,7 @@ include_directories(
   ${soem_INCLUDE_DIRS}/soem
 )
 ```
+**Note** that this assumes you have installed `soem` from `apt` or followed the setup layed out in the [Development](#Development) section!
 
 ## Development
 
