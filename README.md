@@ -43,7 +43,7 @@ If `soem` has been released for your respective ROS distribution, you can simply
 sudo apt install ros-<DISTRO>-soem
 ```
 
-Currently, `soem` has been released for ROS `indigo` and `kinetic` and will soon be released for `melodic`.
+Currently, `soem` has been released for ROS `indigo`, `kinetic` and `melodic`.
 If you want to use `soem` from source, please check out the section about [Development](#Development).
 
 ## Usage
