@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>soem</name>
+  <version>0.0.0</version>
+  <description>
+    ROS wrapper for the Simple Open EtherCAT Master SOEM.
+    This is a new version of the original SOEM wrapper released into ROS under the name soem.
+  </description>
+
+  <maintainer email="matthias.gruhler@gmail.com">Matthias Gruhler</maintainer>
+
+  <license>GPLv2 with linking exception</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
