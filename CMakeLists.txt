@@ -3,8 +3,10 @@ project(soem)
 
 find_package(catkin REQUIRED)
 
+# create directory during CMake build system creation step
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/soem)
 
+# Copy header to ROS-standard location to satisfy catkin_package
 add_custom_target(CopyHeaders ALL
                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
                           ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/soem/*.h
@@ -25,4 +27,10 @@ catkin_package(
   LIBRARIES soem
 )
 
+# SOEM is, by default, built with position-dependent code as a static library.
+# To be able to include SOEM in a dynamic library (default ROS convention),
+# it needs to be built with position-independent code.
+# Thus, we add -fPIC here.
+# This allows us to still include this in any shared libraries we create.
+add_definitions(-fPIC)
 add_subdirectory(SOEM)
