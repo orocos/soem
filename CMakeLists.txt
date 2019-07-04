@@ -3,7 +3,9 @@ project(soem)
 
 find_package(catkin REQUIRED)
 
-catkin_destinations() # set-up destination variables
+# set-up destination variables
+catkin_destinations()
+
 # create directory during CMake build system creation step
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
