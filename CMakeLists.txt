@@ -3,17 +3,18 @@ project(soem)
 
 find_package(catkin REQUIRED)
 
-message(DEPRECATION
-        [=[
-          ROS package SOEM header workaround deprecation:
+message([=[
+        
+          SOEM ROS package header workaround deprecation:
+          ===============================================
           
           Prior, due to the code layout in soem, a workaround
           has been necessary in users of this library.
-          This version solves this issuenow by
+          This version solves this issue now by
           providing proper cmake configuration files.
           
           If you've used the workaround of specifying
-          ${soem_INCLUDE_DIRS}/soem in the include_directories section
+          `${soem_INCLUDE_DIRS}/soem` in the include_directories section
           in your code/library, you should remove this now.
         ]=]
        )
