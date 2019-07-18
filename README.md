@@ -2,10 +2,21 @@
 
 **Table of Contents**
 
+- [SOEM ROS Package Upgrade](#SOEM-ROS-Package-Upgrade)
 - [Package Description](#Package-Description)
 - [Installation](#Installation)
 - [Usage](#Usage)
 - [Development](#Development)
+
+## SOEM ROS Package Upgrade
+This package has been upgraded to the new Release of the upstream SOEM repo v1.4.0.
+This upgrade brings not only the new release, but also changes to the `catkin` plumbing.
+This allows you to use `soem` from within your regular ROS workspace.
+No more jumping through the hoops required, that are described in the [Usage section](#Usage).
+The changes to the build system are backwards compatible.
+
+If you experience problems with the new version, please try to revert to tag v1.3.0
+and test if this solves your issues.
 
 ## Package Description
 
