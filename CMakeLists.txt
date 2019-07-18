@@ -2,6 +2,31 @@ cmake_minimum_required(VERSION 2.6.4)
 
 project(soem)
 
+message([=[
+=====================================
+SOEM ROS Package Upgrade Announcement
+=====================================
+To any consumers of the SOEM ROS package:
+
+This package will be upgraded to the new Release of the upstream SOEM repo v1.4.0.
+The upgrade via this PR on GitHub https://github.com/mgruhler/soem/pull/24 will happen on the
+
+    ===================
+    31st of August 2019
+    ===================
+
+This upgrade will bring not only the new release, but also changes to the `catkin` plumbing.
+This allows you to use soem from within your regular ROS workspace. No more jumping through
+the hoops required, that are described in the Usage section of the Readme: https://github.com/mgruhler/soem#usage.
+
+The changes to the build system are backwards compatible.
+
+Changes in upstream SOEM, however, might not be! Please test the above linked PR and provide
+feedback until the merge deadline, if you are a heavy user of this library.
+
+The current state of the SOEM ROS package has been tagged with v1.3.0 if you cannot use the new version.
+]=])
+
 find_package(catkin QUIET)
 if(catkin_FOUND)
   catkin_package( INCLUDE_DIRS soem osal oshw/linux
