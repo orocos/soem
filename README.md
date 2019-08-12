@@ -104,6 +104,22 @@ include_directories(
 ```
 **Note** that this assumes you have installed `soem` from `apt` or followed the setup layed out in the [Development](#Development) section!
 
+### Running without sudo/root
+SOEM requires access to certain network capabilities as it is using raw sockets, and as such any executable linking
+against SOEM needs to be run with certain privileges.
+Typically, you run any SOEM executables with `sudo` or as `root`.
+Tis is impractical for any ROS system, and as such there exists a tool called
+[`ethercat_grant`](https://github.com/shadow-robot/ethercat_grant) that helps with that.
+
+Install with
+```bash
+sudo apt install ros-<DISTRO>-ethercat-ethercat_grant
+```
+and add the following to your your `node` tag in your launchfile
+```xml
+launch-prefix="ethercat_grant
+```
+
 ## Development
 
 If you want to use `soem` in ROS using a ROS distro it has not been released for, or build it from source,
