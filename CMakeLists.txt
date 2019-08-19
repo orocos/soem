@@ -30,7 +30,7 @@ The current state of the SOEM ROS package has been tagged with v1.3.0 if you can
 find_package(catkin QUIET)
 if(catkin_FOUND)
   catkin_package( INCLUDE_DIRS soem osal oshw/linux
-                  LIBRARIES soem
+                  LIBRARIES soem osal oshw
                   )
 endif()
 
