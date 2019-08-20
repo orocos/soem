@@ -46,9 +46,26 @@ add_custom_target(CopyHeaders ALL
                           ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
                   COMMENT "Copying SOEM headers to ROS-standard in devel space location.")
 
+# explicitely find pthread to be able to explicitely export the pthread dependency via catkin_package
+# see https://github.com/ros/ros_comm/issues/135
+set(PTHREAD_LIB "")
+find_package(Threads)
+if(CMAKE_THREAD_LIBS_INIT)
+  string(LENGTH ${CMAKE_THREAD_LIBS_INIT} _length)
+  if(_length GREATER 2)
+    string(SUBSTRING ${CMAKE_THREAD_LIBS_INIT} 0 2 _prefix)
+    if(${_prefix} STREQUAL "-l")
+      math(EXPR _rest_len "${_length} - 2")
+      string(SUBSTRING ${CMAKE_THREAD_LIBS_INIT} 2 ${_rest_len} PTHREAD_LIB)
+    endif()
+  endif()
+endif()
+
+# export dependencies and targets to catkin
+# explicitely export pthread, as stated above
 catkin_package(
   CFG_EXTRAS soem-ros-extras.cmake
-  LIBRARIES soem
+  LIBRARIES soem ${PTHREAD_LIB}
 )
 
 # SOEM is, by default, built with position-dependent code as a static library.
