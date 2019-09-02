@@ -1,39 +1,22 @@
 # SOEM for ROS
 
----
-
-# **IMPORTANT INFORMATION**
-
-**SOEM ROS Package Upgrade Announcement**
-
-
-To any consumers of the SOEM ROS package:
-
-This package will be upgraded to the new Release of the upstream SOEM repo v1.4.0.
-The upgrade via [this PR on GitHub](https://github.com/mgruhler/soem/pull/24) will happen on the
-
-**31st of August 2019**
-
-This upgrade will bring not only the new release, but also changes to the `catkin` plumbing.
-This allows you to use soem from within your regular ROS workspace. No more jumping through
-the hoops required, that are described in the [Usage section](#Usage).
-
-The changes to the build system are backwards compatible.
-
-Changes in upstream SOEM, however, **might not be**!
-Please test the above linked PR and provide
-feedback until the merge deadline, if you are a heavy user of this library.
-
-The current state of the SOEM ROS package has been tagged with v1.3.0 if you cannot use the new version.
-
----
-
 **Table of Contents**
 
+- [SOEM ROS Package Upgrade](#SOEM-ROS-Package-Upgrade)
 - [Package Description](#Package-Description)
 - [Installation](#Installation)
 - [Usage](#Usage)
 - [Development](#Development)
+
+## SOEM ROS Package Upgrade
+This package has been upgraded to the new Release of the **upstream SOEM repo v1.4.0**.
+This upgrade brings not only the new release, but also changes to the `catkin` plumbing.
+This allows you to use `soem` from within your regular ROS workspace.
+So you don't need to specify `${soem_INCLUDE_DIRS}/soem` in the `include_directories` section of your package anymore.
+The changes to the build system are backwards compatible.
+
+If you experience problems with the new version, please try to revert to tag v1.3.0
+and test if this solves your issues.
 
 ## Package Description
 
@@ -44,12 +27,7 @@ SOEM has originally been hosted at http://developer.berlios.de/projects/soem/
 but has been moved to [GitHub and the OpenEtherCATsociety organisation](
 https://github.com/OpenEtherCATsociety/SOEM).
 
-This package contains the original SOEM C code provided by the Technische Universiteit Eindhoven,
-the development of which has been taken over by [rt-labs](https://rt-labs.com/).
-As the original source is down, it is not totally clear what the state of this package is with respect
-to the upstream repository.
-It is, however, approximately the one merged in [OpenEtherCATsociety/SOEM#1](
-https://github.com/OpenEtherCATsociety/SOEM/pull/1).
+This package contains the upstream SOEM repository as a git subtree and wraps it to be easily used within ROS.
 
 **Disclaimer**:
 This package is not a development package for SOEM, but rather a wrapper to provide SOEM to ROS.
@@ -96,13 +74,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 include_directories(
   ...
-  ## The following work around allows SOEM headers to include other SOEM headers.
-  ## SOEM headers assume all headers are installed in a flat directory structure
-  ## See https://github.com/mgruhler/soem/issues/4 for more information.
-  ${soem_INCLUDE_DIRS}/soem
+  ${catkin_INCLUDE_DIRS}
 )
 ```
-**Note** that this assumes you have installed `soem` from `apt` or followed the setup layed out in the [Development](#Development) section!
 
 ### Running without sudo/root
 SOEM requires access to certain network capabilities as it is using raw sockets, and as such any executable linking
@@ -122,11 +96,18 @@ launch-prefix="ethercat_grant
 
 ## Development
 
-If you want to use `soem` in ROS using a ROS distro it has not been released for, or build it from source,
-you need to make sure to use it from an [`install space`](http://wiki.ros.org/catkin/workspaces#Install_Space).
-In its current state, this repo is doing some copying of header files during the installation step, which is not done
-and thus will not work in regular build/devel space layouts.
+With the integration of the upstream SOEM repo as a git subtree, and a major overhaul of the build system,
+it is now possible to use the soem ROS package easily from your regular ROS workspace.
 
-Thus, if you want to use `soem` from source, it is encouraged that you put this in an underlay install space.
+Simply clone this repository into your workspace
+```bash
+git clone git@github.com:mgruhler/soem.git
+```
 
-This has been tested using both, `catkin_make` and `catkin build`.
+Note that if you want to update or patch the subtree which includes the SOEM upstream repository, you need to be sure
+to do this properly.
+When creating this, I followed the instructions in
+[this Atlassian blog post](https://www.atlassian.com/blog/git/alternatives-to-git-submodule-git-subtree).
+This covers all the things you need.
+
+This package has been tested using both, `catkin_make` and `catkin build`.

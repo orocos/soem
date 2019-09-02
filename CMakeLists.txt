@@ -1,68 +1,79 @@
-cmake_minimum_required(VERSION 2.6.4)
-
+cmake_minimum_required(VERSION 2.8.12)
 project(soem)
 
+find_package(catkin REQUIRED)
+
 message([=[
-=====================================
-SOEM ROS Package Upgrade Announcement
-=====================================
-To any consumers of the SOEM ROS package:
+        
+          SOEM ROS Package Upgrade Announcement
+          =====================================
+          
+          Prior, due to the code layout in soem, a workaround
+          has been necessary in users of this library.
+          This version solves this issue now by
+          providing proper cmake configuration files.
+          
+          If you've used the workaround of specifying
+          `${soem_INCLUDE_DIRS}/soem` in the include_directories section
+          in your code/library, you should remove this now.
+          
+          Also, this package has been upgraded to the upstream
+          SOEM release 1.4.0.
+          If you experience any problems, you can revert to
+          release v1.3.0 of this package to retrieve the old state.
+        ]=]
+       )
 
-This package will be upgraded to the new Release of the upstream SOEM repo v1.4.0.
-The upgrade via this PR on GitHub https://github.com/mgruhler/soem/pull/24 will happen on the
+# set-up destination variables
+catkin_destinations()
 
-    ===================
-    31st of August 2019
-    ===================
+# create directory during CMake build system creation step
+file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-This upgrade will bring not only the new release, but also changes to the `catkin` plumbing.
-This allows you to use soem from within your regular ROS workspace. No more jumping through
-the hoops required, that are described in the Usage section of the Readme: https://github.com/mgruhler/soem#usage.
+# Copy header to ROS-standard location in devel space to satisfy catkin_package
+add_custom_target(CopyHeaders ALL
+                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/soem/*.h
+                          ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/osal/osal.h
+                          ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/osal/linux/*.h
+                          ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/oshw/linux/*.h
+                          ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+                  COMMENT "Copying SOEM headers to ROS-standard in devel space location.")
 
-The changes to the build system are backwards compatible.
-
-Changes in upstream SOEM, however, might not be! Please test the above linked PR and provide
-feedback until the merge deadline, if you are a heavy user of this library.
-
-The current state of the SOEM ROS package has been tagged with v1.3.0 if you cannot use the new version.
-]=])
-
-find_package(catkin QUIET)
-if(catkin_FOUND)
-  catkin_package( INCLUDE_DIRS soem osal oshw/linux
-                  LIBRARIES soem
-                  )
+# explicitely find pthread to be able to explicitely export the pthread dependency via catkin_package
+# see https://github.com/ros/ros_comm/issues/135
+set(PTHREAD_LIB "")
+find_package(Threads)
+if(CMAKE_THREAD_LIBS_INIT)
+  string(LENGTH ${CMAKE_THREAD_LIBS_INIT} _length)
+  if(_length GREATER 2)
+    string(SUBSTRING ${CMAKE_THREAD_LIBS_INIT} 0 2 _prefix)
+    if(${_prefix} STREQUAL "-l")
+      math(EXPR _rest_len "${_length} - 2")
+      string(SUBSTRING ${CMAKE_THREAD_LIBS_INIT} 2 ${_rest_len} PTHREAD_LIB)
+    endif()
+  endif()
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} 
-                    ${CMAKE_CURRENT_SOURCE_DIR}/osal
-                    ${CMAKE_CURRENT_SOURCE_DIR}/oshw/linux
-                    ${CMAKE_CURRENT_SOURCE_DIR}/soem )
+# export dependencies and targets to catkin
+# explicitely export pthread, as stated above
+catkin_package(
+  CFG_EXTRAS soem-ros-extras.cmake
+  LIBRARIES soem ${PTHREAD_LIB}
+)
 
-add_definitions(-DEC_VER1)
-add_subdirectory(osal)
-add_subdirectory(oshw)
-add_subdirectory(soem)
-add_subdirectory(test)
-
-install(FILES package.xml DESTINATION share/soem)
-
-# Add all targets to the build-tree export set
-export(TARGETS soem osal oshw simple_test red_test slaveinfo eepromtool ebox firm_update FILE "${PROJECT_BINARY_DIR}/SoemTargets.cmake")
- 
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-export(PACKAGE soem)
- 
-
-configure_file(soem-config.cmake.in ${PROJECT_BINARY_DIR}/soem-config.cmake @ONLY)
-configure_file(soem-config-version.cmake.in ${PROJECT_BINARY_DIR}/soem-config-version.cmake @ONLY)
- 
-install(FILES ${PROJECT_BINARY_DIR}/soem-config.cmake ${PROJECT_BINARY_DIR}/soem-config-version.cmake
-  DESTINATION share/soem)
- 
-# Install the export set for use with the install-tree
-install(EXPORT SoemTargets DESTINATION share/soem)
-
-
-
+# SOEM is, by default, built with position-dependent code as a static library.
+# To be able to include SOEM in a dynamic library (default ROS convention),
+# it needs to be built with position-independent code.
+# Thus, we add -fPIC here.
+# This allows us to still include this in any shared libraries we create.
+add_compile_options(-fPIC)
+#catkin_lint: ignore duplicate_cmd
+#catkin_lint: ignore subproject
+add_subdirectory(SOEM)
