@@ -2,8 +2,8 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2019-09-19)
+------------------
 * Merge pull request `#24 <https://github.com/mgruhler/soem/issues/24>`_ from mgruhler/upstream_soem_via_subtree
   Upstream soem release 1.4.0 via subtree
 * explicitely export pthread dependency, reported in `#30 <https://github.com/mgruhler/soem/issues/30>`_
