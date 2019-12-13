@@ -3,7 +3,11 @@
  * LICENSE file in the project root for full license information
  */
 
+#ifdef WIN32_LEAN_AND_MEAN
+#undef WIN32_LEAN_AND_MEAN
+#endif
 #include <winsock2.h>
+#include <malloc.h>
 #include <osal.h>
 #include "osal_win32.h"
 
