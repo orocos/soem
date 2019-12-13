@@ -92,6 +92,9 @@ catkin_package(
 # Thus, we add -fPIC here.
 # This allows us to still include this in any shared libraries we create.
 add_compile_options(-fPIC)
+# removed any pre-defined `WIN32_LEAN_AND_MEAN`.
+# Otherwise, many symbols will be reported as missing.
+remove_definitions(-DWIN32_LEAN_AND_MEAN)
 #catkin_lint: ignore duplicate_cmd
 #catkin_lint: ignore subproject
 add_subdirectory(SOEM)
