@@ -30,21 +30,39 @@ catkin_destinations()
 # create directory during CMake build system creation step
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
+if(WIN32)
+  set(OS "win32")
+else()
+  set(OS "linux")
+endif()
+
+file(GLOB SOEM_COMMON_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/SOEM/soem/*.h")
+file(GLOB SOEM_OSAL_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/SOEM/osal/${OS}/*.h")
+file(GLOB SOEM_OSHW_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/SOEM/oshw/${OS}/*.h")
+
 # Copy header to ROS-standard location in devel space to satisfy catkin_package
 add_custom_target(CopyHeaders ALL
                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/soem/*.h
+                          ${SOEM_COMMON_HEADERS}
                           ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
                           ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/osal/osal.h
                           ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/osal/linux/*.h
+                          ${SOEM_OSAL_HEADERS}
                           ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/oshw/linux/*.h
+                          ${SOEM_OSHW_HEADERS}
                           ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
                   COMMENT "Copying SOEM headers to ROS-standard in devel space location.")
+
+if(WIN32)
+  add_custom_target(CopyWpcapHeaders ALL
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory
+                          ${CMAKE_CURRENT_SOURCE_DIR}/SOEM/oshw/${OS}/wpcap/Include/
+                          ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+                  COMMENT "Copying Wpcap headers to ROS-standard in devel space location.")
+endif()
 
 # explicitely find pthread to be able to explicitely export the pthread dependency via catkin_package
 # see https://github.com/ros/ros_comm/issues/135
@@ -74,6 +92,9 @@ catkin_package(
 # Thus, we add -fPIC here.
 # This allows us to still include this in any shared libraries we create.
 add_compile_options(-fPIC)
+# removed any pre-defined `WIN32_LEAN_AND_MEAN`.
+# Otherwise, many symbols will be reported as missing.
+remove_definitions(-DWIN32_LEAN_AND_MEAN)
 #catkin_lint: ignore duplicate_cmd
 #catkin_lint: ignore subproject
 add_subdirectory(SOEM)
