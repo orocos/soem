@@ -3,6 +3,7 @@
 **Table of Contents**
 
 - [SOEM ROS Package Upgrade](#SOEM-ROS-Package-Upgrade)
+- [A Note On The Version Number](#A-Note-On-The-Version-Number)
 - [Package Description](#Package-Description)
 - [Installation](#Installation)
 - [Usage](#Usage)
@@ -17,6 +18,23 @@ The changes to the build system are backwards compatible.
 
 If you experience problems with the new version, please try to revert to tag v1.3.0
 and test if this solves your issues.
+
+## A Note On The Version Number
+This package tracks the upstream Open Ethercat Master Repo and thus should
+directly reference the respective version number of the upstream.
+As this does not allow for intermediate releases that only change ROS specific
+parts, like the CMake plumbing, it has been decided to deviate from the upstream
+version by adding an arbitrary number (100) to the patch part of the version,
+and then multiplying by ten (i.e. (patch of upstream + 100) * 10).
+This allows for intermediate releases in between integrations of upstream releases.
+    
+Thus, the version numbers relate to each other as follows:
+    
+1.4.1000 -> upstream 1.4.0
+1.4.1010 -> upstream 1.4.1
+1.4.1011 -> upstream 1.4.1 + ROS specific changes 1
+    
+The idea for this approach was taken from the [cartographer_ros package](https://github.com/ros2/cartographer_ros).
 
 ## Package Description
 
