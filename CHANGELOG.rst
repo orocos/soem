@@ -2,8 +2,8 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.1000 (2020-06-19)
+---------------------
 * fix formatting of README
 * remove stale bot
 * change version number policy and bump to 1.4.1000
