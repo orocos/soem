@@ -2,6 +2,18 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix formatting of README
+* remove stale bot
+* change version number policy and bump to 1.4.1000
+* bump cmake_minimum to 3.0.2
+* Merge pull request `#33 <https://github.com/mgruhler/soem/issues/33>`_ from seanyen/windows
+  [master] Enable Windows build.
+* undef WIN32_LEAN_AND_MEAN instead of touching SOEM code.
+* Enable Windows build.
+* Contributors: Matthias Gruhler, seanyen
+
 1.4.0 (2019-09-19)
 ------------------
 * Merge pull request `#24 <https://github.com/mgruhler/soem/issues/24>`_ from mgruhler/upstream_soem_via_subtree
