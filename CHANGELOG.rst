@@ -2,8 +2,8 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.1001 (2020-06-19)
+---------------------
 * remove package upgrade message
 * Contributors: D2/EIN-gr Gruhler, Matthias
 

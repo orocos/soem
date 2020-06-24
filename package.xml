@@ -19,7 +19,7 @@
     The idea for this approach was taken from the cartographer_ros package at
     https://github.com/ros2/cartographer_ros
   -->
-  <version>1.4.1000</version>
+  <version>1.4.1001</version>
   <description>
     ROS wrapper for the Simple Open EtherCAT Master SOEM.
     This is an updated version of the original SOEM wrapper released into ROS now including
