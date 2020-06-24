@@ -3,27 +3,6 @@ project(soem)
 
 find_package(catkin REQUIRED)
 
-message([=[
-        
-          SOEM ROS Package Upgrade Announcement
-          =====================================
-          
-          Prior, due to the code layout in soem, a workaround
-          has been necessary in users of this library.
-          This version solves this issue now by
-          providing proper cmake configuration files.
-          
-          If you've used the workaround of specifying
-          `${soem_INCLUDE_DIRS}/soem` in the include_directories section
-          in your code/library, you should remove this now.
-          
-          Also, this package has been upgraded to the upstream
-          SOEM release 1.4.0.
-          If you experience any problems, you can revert to
-          release v1.3.0 of this package to retrieve the old state.
-        ]=]
-       )
-
 # set-up destination variables
 catkin_destinations()
 
