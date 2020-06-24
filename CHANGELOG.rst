@@ -2,6 +2,11 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove package upgrade message
+* Contributors: D2/EIN-gr Gruhler, Matthias
+
 1.4.1000 (2020-06-19)
 ---------------------
 * fix formatting of README
