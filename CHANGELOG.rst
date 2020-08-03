@@ -2,6 +2,11 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixes `#40 <https://github.com/mgruhler/soem/issues/40>`_: export include directories properly
+* Contributors: Matthias Gruhler
+
 1.4.1002 (2020-06-24)
 ---------------------
 * Merge pull request `#39 <https://github.com/mgruhler/soem/issues/39>`_ from mgruhler/fix/warnings_as_errors_focal
