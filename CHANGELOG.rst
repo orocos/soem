@@ -2,8 +2,8 @@
 Changelog for package soem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.1003 (2020-08-03)
+---------------------
 * fixes `#40 <https://github.com/mgruhler/soem/issues/40>`_: export include directories properly
 * Contributors: Matthias Gruhler
 
