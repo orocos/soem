@@ -12,15 +12,13 @@ Clearly and concisely post your question. Give as much detail as required (and n
 
 **ROS Distro (please check as appropriate):**
  - [ ] Kinetic
- - [ ] Lunar
  - [ ] Melodic
+ - [ ] Noetic
  - [ ] Other: ...
 
-**SOEM ROS Wrapper version (please check as appropriate):**
- - [ ] from apt: 1.3.0
- - [ ] from apt: 1.4.0
- - [ ] from source: 1.3.0
- - [ ] from source: 1.4.0
+**SOEM ROS Wrapper version (please check and complete as appropriate):**
+ - [ ] from apt: 1.?.?
+ - [ ] from source: 1.?.?
  - [ ] Commit SHA:
 
 **Hardware setup**

@@ -15,7 +15,7 @@ A clear and concise description of what the bug is.
 Steps to reproduce the behavior:
 1. Check out version '...'
 2. Compile with '....'
-4. See error
+3. See error
 ```
 error c'n'p
 ```
@@ -25,14 +25,12 @@ A clear and concise description of what you expected to happen.
 
 **ROS Distro (please check as appropriate):**
  - [ ] Kinetic
- - [ ] Lunar
  - [ ] Melodic
+ - [ ] Noetic
 
-**SOEM ROS Wrapper version (please check as appropriate):**
- - [ ] from apt: 1.3.0
- - [ ] from apt: 1.4.0
- - [ ] from source: 1.3.0
- - [ ] from source: 1.4.0
+**SOEM ROS Wrapper version (please check and complete as appropriate):**
+ - [ ] from apt: 1.?.?
+ - [ ] from source: 1.?.?
  - [ ] Commit SHA:
 
 **`CMakeLists.txt`**

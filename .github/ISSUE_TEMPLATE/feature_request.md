@@ -15,8 +15,8 @@ A clear and concise description of what you want to happen.
 
 **ROS Distro (please check as appropriate):**
  - [ ] Kinetic
- - [ ] Lunar
  - [ ] Melodic
+ - [ ] Noetic
  - [ ] Other: ...
 
 **Hardware setup**
